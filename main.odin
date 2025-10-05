@@ -165,12 +165,6 @@ generate_flow_vectors :: proc(cost_field: []f32) -> ([]int, []cstring) {
     return flow_field, visual_field
 }
 
-round_decimal :: proc(a, b: f32) -> f32 {
-    multiplier := math.pow_f32(10.0, b)
-    rounded := math.round_f32(a * multiplier) / multiplier
-    return rounded
-}
-
 main :: proc() {
     tracking_allocator: mem.Tracking_Allocator
     mem.tracking_allocator_init(&tracking_allocator, context.allocator)
@@ -202,13 +196,19 @@ main :: proc() {
     interval :f32= 0
     for !rl.WindowShouldClose() {
         if rl.IsKeyReleased(.R) {
+
             for i in 0..<THREAD_COUNT {
+                delete(thread_data[i].cost_field)
+                delete(thread_data[i].flow_field)
+                delete(thread_data[i].visual_field)
+
                 x := rand.int_max(9)
                 y := rand.int_max(9)
 
                 thread_data[i] = Task{
                     id = i,
-                    goal = [2]int{x,y}
+                    goal = [2]int{x,y},
+                    allocator = context.allocator
                 }
 
                 threads[i] = thread.create(thread_worker)
@@ -275,4 +275,10 @@ main :: proc() {
         rl.EndDrawing()
     }
     rl.CloseWindow()
+
+    for &field in flow_fields {
+        delete(field.cost_field)
+        delete(field.flow_field)
+        delete(field.visual_field)
+    }
 }

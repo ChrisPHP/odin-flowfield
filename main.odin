@@ -54,6 +54,8 @@ main :: proc() {
     rl.InitWindow(20 * CELL_SIZE, 10 * CELL_SIZE, "2D Grid")
     rl.SetTargetFPS(60)
 
+    cost_field := flowfield.calculate_flow_field(goal, tilemap)
+    flow_field_2, visual_field_2 := flowfield.generate_flow_vectors(cost_field, tilemap)
 
     interval :f32= 0
     for !rl.WindowShouldClose() {
